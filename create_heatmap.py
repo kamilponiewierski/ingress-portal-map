@@ -1,31 +1,33 @@
 import gmplot
+import csv
 
 
-def coord(latlng):
-    return latlng.split(',')
+def csv_to_list(spreadsheet):
+    text = []
+    with open(spreadsheet, encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            new = [row['Portal Name'], row['Lat/Lon']]
+            reformatted = '\t'.join(new)
+            text.append(reformatted)
+    return text
 
 
-lat_list = []
-lng_list = []
-name_list = []
-with open('portals.txt', encoding='utf-8') as f:
-    for line in f:
+def draw_map(portal_list, map_name="map.html"):
+    lat_list = []
+    lng_list = []
+    name_list = []
+    for line in portal_list:
         pair = line.split("\t")
         name_list.append(pair[0])
-        lat, lng = coord(pair[1])
+        lat, lng = pair[1].split(",")
         lat_list.append(float(lat))
         lng_list.append(float(lng))
 
-# gmap = gmplot.GoogleMapPlotter(51.919396, 19.145208, 7, apikey="AIzaSyCHHiyHAmqMBzE9A1LV3sLTq9T_P5i4pBU")
-gmap = gmplot.GoogleMapPlotter(51.919396, 19.145208, 7)
-gmap.heatmap(lat_list, lng_list)
+    gmap = gmplot.GoogleMapPlotter(51.919396, 19.145208, 7)
+    gmap.heatmap(lat_list, lng_list)
+
+    gmap.draw(map_name)
 
 
-# punkty
-# gmap.scatter(lat_list, lng_list, '#3B0B39', size=40, marker=False)
-
-# for i in range(0, len(lat_list)):
-#     gmap.marker(lat_list[i], lng_list[i], title=name_list[i])
-
-
-gmap.draw("map.html")
+draw_map(csv_to_list("IPST.csv"))
